@@ -24,15 +24,26 @@ make bootstrap        # installs the Emscripten SDK
 make serve            # builds and serves http://localhost:8000/tank.html
 ```
 
-`make web` picks up `em++` from `./emsdk` automatically — no need to `source emsdk_env.sh` first.
-
 ### Requirements
 
 | Target | Needs |
 |---|---|
 | `make run` on macOS | Xcode Command Line Tools. `GLUT.framework` and `OpenGL.framework` are deprecated but still ship in the macOS 26 SDK. |
 | `make run` on Linux | `freeglut3-dev libglu1-mesa-dev` (Debian/Ubuntu) or `freeglut-devel mesa-libGLU-devel` (Fedora). |
-| `make web` | Only `make bootstrap`. Nothing else. |
+| `make web` | `make bootstrap`, which needs only `git` and `python3`. |
+
+### How the browser toolchain gets installed
+
+`make bootstrap` runs [`tools/setup-emsdk.sh`](tools/setup-emsdk.sh), which clones the Emscripten
+SDK into `./emsdk` and installs the latest toolchain there — roughly 1.5 GB.
+
+It is entirely self-contained: no system packages, no `sudo`, no changes to your shell profile.
+Delete `./emsdk` to undo it completely. The folder is gitignored, which is why the repo itself is
+under 7 MB.
+
+You do **not** need to `source emsdk_env.sh` afterwards — the Makefile looks for `em++` on your
+`PATH` first and falls back to `./emsdk/upstream/emscripten/em++`, so `make web` just works. If you
+run `make web` before bootstrapping, it stops and tells you to run `make bootstrap`.
 
 ### Controls
 
