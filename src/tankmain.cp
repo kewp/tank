@@ -144,6 +144,25 @@ void OpenGLInit(int argc, char* argv[])
 	glutReshapeFunc(reshape);
 	glutDisplayFunc(display);
 
+	// [2026 port] Establish the viewport and projection NOW, rather than waiting for a reshape
+	// event to deliver them.
+	//
+	// reshape() is the only thing that ever calls gluPerspective. Desktop GLUT fires the reshape
+	// callback once when the window is created, so the 2007 code got a projection matrix for free.
+	// Emscripten's GLUT fires it only on an actual resize -- so in a browser the projection stays
+	// the identity matrix, which leaves every eye-space vertex far outside clip space and renders
+	// an entirely black canvas.
+	//
+	// The giveaway symptom: the game springs to life the moment anything resizes the page, such as
+	// opening DevTools, and looks broken until then.
+	{
+		int w = glutGet(GLUT_WINDOW_WIDTH);
+		int h = glutGet(GLUT_WINDOW_HEIGHT);
+		if (w <= 0) w = 1450;
+		if (h <= 0) h = 820;
+		reshape(w, h);
+	}
+
 	// Setup the Keyboard / Mouse Handlers (found in Control.cp)
 	glutKeyboardFunc(InGameKeystrokeDown);
 	glutKeyboardUpFunc(InGameKeystrokeUp);

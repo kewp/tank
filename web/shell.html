@@ -132,8 +132,26 @@
 
   var Module = {
     canvas: canvas,
+
+    // Cache busting. GitHub Pages serves these with max-age=600 under fixed filenames, so for ten
+    // minutes after a deploy a returning visitor can get a stale index.js paired with a fresh
+    // index.wasm -- which does not merely look wrong, it fails to instantiate. __BUILD_ID__ is
+    // replaced with the commit SHA at build time (see the `pages` target in the Makefile), so each
+    // deploy fetches its own matching set.
+    locateFile: function (path, prefix) { return prefix + path + '?v=__BUILD_ID__'; },
+
     print:    function (t) { console.log(t); },
-    printErr: function (t) { console.warn(t); },
+
+    // Surface real failures on the page. A WebGL context that will not create, or a shader that
+    // will not compile, otherwise produces a silent black canvas that is indistinguishable from
+    // "still loading" -- and the shim reports both through stderr, which lands here.
+    printErr: function (t) {
+      console.warn(t);
+      if (/error|fail|abort|not supported|invalid/i.test(t) && !/sky1\.sgi/.test(t)) {
+        statusEl.style.color = '#E4703F';
+        statusEl.textContent = t;
+      }
+    },
     setStatus: function (t) {
       statusEl.textContent = t || 'ready — click to play';
     },

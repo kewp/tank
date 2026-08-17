@@ -108,6 +108,7 @@ build/web/tank.html: $(SRCS) $(wildcard assets/*) web/shell.html
 		echo "Emscripten not found. Run:  make bootstrap"; exit 1; }
 	"$(EMXX)" $(EMFLAGS) --shell-file web/shell.html \
 		-x c++ $(MAIN) -x c++ src/gl1/gl1.cpp -o $@
+	@sed -e "s/__BUILD_ID__/dev/g" $@ > $@.tmp && mv $@.tmp $@
 	@echo "built $@"
 
 # ---------------------------------------------------------------------------
@@ -123,7 +124,18 @@ build/pages/index.html: $(SRCS) $(wildcard assets/*) web/shell.html
 		echo "Emscripten not found. Run:  make bootstrap"; exit 1; }
 	"$(EMXX)" $(EMFLAGS) --shell-file web/shell.html \
 		-x c++ $(MAIN) -x c++ src/gl1/gl1.cpp -o $@
-	@echo "built $@"
+	@# Stamp a build id onto every sub-resource URL. Pages serves index.js/.wasm/.data under
+	@# fixed names with max-age=600, so without this a returning visitor can pick up a stale
+	@# index.js against a fresh index.wasm in the ten minutes after a deploy -- which fails to
+	@# instantiate rather than merely looking out of date.
+	@# Note emcc minifies the shell, so the tag it emits is `src=index.js` with no quotes;
+	@# both forms are handled in case that changes.
+	@id=`git rev-parse --short HEAD 2>/dev/null || date +%Y%m%d%H%M%S`; \
+	sed -e "s/__BUILD_ID__/$$id/g" \
+	    -e "s|src=\"index\.js\"|src=\"index.js?v=$$id\"|g" \
+	    -e "s|src=index\.js|src=index.js?v=$$id|g" $@ > $@.tmp && mv $@.tmp $@; \
+	grep -q "index.js?v=$$id" $@ || { echo "cache-bust stamp failed"; exit 1; }; \
+	echo "built $@ (build id $$id)"
 
 # One-time setup on a fresh clone: fetches the Emscripten SDK into ./emsdk
 # (~1.5 GB, gitignored). Only needed for `make web`.
