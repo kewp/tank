@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="How a 2007 fixed-function OpenGL tank game was brought back to life on Apple Silicon, and what a WebAssembly port would actually cost.">
+<meta name="color-scheme" content="light dark">
+<style>
+/* minimal reset -- the Artifact host supplies one; a standalone file must not rely on it */
+*,*::before,*::after{box-sizing:border-box;}
+body{margin:0;}
+img,svg{max-width:100%;height:auto;}
+</style>
+<title>Tank 2007 Revival</title>
+<style>
+/* ---- tokens: light (default, un-stamped) ------------------------------- */
+:root{
+  --ground:#E4E5E1;
+  --surface:#EFF0EC;
+  --surface-2:#DADCD6;
+  --line:#C6C9C1;
+  --ink:#1A1C1B;
+  --ink-2:#43473F;
+  --muted:#6E736B;
+  --accent:#B93F19;        /* rust — from the game's explosion textures */
+  --accent-soft:#F0DACF;
+  --steel:#43606E;
+  --steel-soft:#D6DFE2;
+  --ok:#416B48;
+  --warn:#8E6114;
+  --crit:#B93F19;
+  --code-bg:#DCDED7;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#131513;
+    --surface:#1C1F1C;
+    --surface-2:#262A26;
+    --line:#333832;
+    --ink:#DEE1DA;
+    --ink-2:#B2B7AE;
+    --muted:#868C83;
+    --accent:#E4703F;
+    --accent-soft:#3A241B;
+    --steel:#8FB2C0;
+    --steel-soft:#202C31;
+    --ok:#7FAE85;
+    --warn:#D0A44E;
+    --crit:#E4703F;
+    --code-bg:#20241F;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#131513;
+  --surface:#1C1F1C;
+  --surface-2:#262A26;
+  --line:#333832;
+  --ink:#DEE1DA;
+  --ink-2:#B2B7AE;
+  --muted:#868C83;
+  --accent:#E4703F;
+  --accent-soft:#3A241B;
+  --steel:#8FB2C0;
+  --steel-soft:#202C31;
+  --ok:#7FAE85;
+  --warn:#D0A44E;
+  --crit:#E4703F;
+  --code-bg:#20241F;
+}
+
+*{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  font-size:16px;
+  line-height:1.6;
+}
+.mono{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;}
+
+.wrap{max-width:820px;margin:0 auto;padding:0 24px 96px;}
+
+/* ---- masthead ---------------------------------------------------------- */
+header.top{
+  border-bottom:2px solid var(--ink);
+  margin-bottom:44px;
+  padding:56px 0 22px;
+}
+.eyebrow{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--muted);margin:0 0 18px;
+  display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+}
+h1{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:clamp(34px,6.5vw,52px);
+  line-height:1.02;font-weight:600;letter-spacing:-.02em;
+  margin:0 0 16px;text-wrap:balance;
+}
+h1 .yr{color:var(--accent);}
+.standfirst{
+  font-size:19px;line-height:1.5;color:var(--ink-2);
+  margin:0;max-width:60ch;text-wrap:pretty;
+}
+
+.statusbar{
+  display:flex;flex-wrap:wrap;gap:8px;margin-top:26px;
+}
+.stat{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:11.5px;letter-spacing:.06em;
+  border:1px solid var(--line);background:var(--surface);
+  padding:5px 10px;color:var(--ink-2);
+  display:inline-flex;gap:7px;align-items:center;
+}
+.stat b{font-weight:600;color:var(--ink);}
+.stat.go{border-color:var(--ok);color:var(--ok);}
+.stat.go b{color:var(--ok);}
+
+/* ---- sections ---------------------------------------------------------- */
+section{margin:0 0 52px;}
+h2{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:12px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;
+  margin:0 0 18px;padding-bottom:9px;
+  border-bottom:1px solid var(--line);
+}
+h3{
+  font-size:17px;font-weight:650;margin:30px 0 8px;letter-spacing:-.005em;
+}
+p{margin:0 0 15px;max-width:66ch;text-wrap:pretty;}
+a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:2px;}
+a:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+code{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:.88em;background:var(--code-bg);padding:1px 5px;
+  border-radius:2px;color:var(--ink);
+}
+
+/* ---- the map ----------------------------------------------------------- */
+.mapframe{
+  background:var(--surface);
+  border:1px solid var(--line);
+  padding:20px;margin:0 0 14px;
+  overflow-x:auto;
+}
+#map{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:10px;line-height:1.25;letter-spacing:.09em;
+  white-space:pre;margin:0;color:var(--muted);
+}
+#map .g{color:var(--muted);opacity:.34;}      /* 0  void   */
+#map .f{color:var(--muted);opacity:.62;}      /* X  floor  */
+#map .w{color:var(--steel);}                  /* B  wall   */
+#map .t{color:var(--ink);font-weight:700;}    /* T  tower  */
+#map .r{color:var(--warn);}                   /* I/H rail  */
+#map .a{color:var(--warn);opacity:.75;}       /* A  arch   */
+#map .x{color:var(--accent);font-weight:700;} /* 2-9 trigger */
+#map .p{color:var(--ok);font-weight:700;}     /* R/D/M pickup */
+
+.legend{
+  display:flex;flex-wrap:wrap;gap:6px 18px;
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:11px;color:var(--muted);margin-bottom:8px;
+}
+.legend span b{font-weight:700;}
+.lg-w b{color:var(--steel);} .lg-t b{color:var(--ink);}
+.lg-x b{color:var(--accent);} .lg-p b{color:var(--ok);} .lg-r b{color:var(--warn);}
+.caption{font-size:13px;color:var(--muted);margin:0;max-width:66ch;}
+
+/* ---- tables ------------------------------------------------------------ */
+.tbl{overflow-x:auto;margin:0 0 12px;}
+table{border-collapse:collapse;width:100%;font-size:14px;}
+th,td{
+  text-align:left;padding:9px 12px 9px 0;
+  border-bottom:1px solid var(--line);vertical-align:top;
+}
+th{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;border-bottom-color:var(--ink-2);
+  white-space:nowrap;
+}
+td.n{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-variant-numeric:tabular-nums;text-align:right;
+  padding-right:16px;white-space:nowrap;color:var(--ink);
+}
+td.k{font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;font-size:12.5px;white-space:nowrap;padding-right:16px;}
+
+.chip{
+  display:inline-block;font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:10px;letter-spacing:.09em;text-transform:uppercase;
+  padding:2px 7px;border:1px solid currentColor;white-space:nowrap;
+}
+.c-triv{color:var(--ok);}
+.c-easy{color:var(--steel);}
+.c-hard{color:var(--crit);}
+.c-fixed{color:var(--ok);}
+.c-open{color:var(--warn);}
+
+/* ---- levels ------------------------------------------------------------ */
+.level{
+  display:grid;grid-template-columns:44px 1fr;gap:0 18px;
+  padding:18px 0;border-bottom:1px solid var(--line);
+}
+.level:last-child{border-bottom:none;}
+.lvnum{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:22px;font-weight:600;color:var(--accent);line-height:1.1;
+  font-variant-numeric:tabular-nums;
+}
+.level.done .lvnum{color:var(--ok);}
+.lvbody h3{margin:0 0 4px;font-size:16px;}
+.lvbody p{margin:0 0 6px;font-size:14.5px;color:var(--ink-2);}
+.lvmeta{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:11px;color:var(--muted);letter-spacing:.05em;
+}
+
+/* ---- callout ----------------------------------------------------------- */
+.callout{
+  border-left:3px solid var(--accent);
+  background:var(--accent-soft);
+  padding:16px 18px;margin:0 0 18px;
+}
+.callout p{margin:0 0 8px;font-size:14.5px;}
+.callout p:last-child{margin:0;}
+.callout .hd{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--accent);font-weight:600;margin-bottom:7px;
+}
+
+pre.sh{
+  background:var(--code-bg);border:1px solid var(--line);
+  padding:14px 16px;overflow-x:auto;margin:0 0 16px;
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:13px;line-height:1.55;color:var(--ink);
+}
+pre.sh .c{color:var(--muted);}
+
+footer{
+  border-top:1px solid var(--line);padding-top:20px;margin-top:56px;
+  font-size:13px;color:var(--muted);
+}
+footer p{margin:0 0 6px;max-width:66ch;}
+
+@media (max-width:560px){
+  .level{grid-template-columns:32px 1fr;gap:0 12px;}
+  #map{font-size:8px;letter-spacing:.05em;}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <p class="eyebrow"><span>Code archaeology</span><span>&middot;</span><span>Ed Martin, Sept–Nov 2007</span><span>&middot;</span><span>Recovered Aug 2026</span></p>
+  <h1>Tank <span class="yr">2007</span><br>Revival</h1>
+  <p class="standfirst">A fixed-function OpenGL tank game written for a Core 2 Duo MacBook, nineteen years ago. It builds and runs on Apple Silicon today. Here is what it is, what had to change, and what a browser port would actually cost.</p>
+  <div class="statusbar">
+    <span class="stat go"><b>&check; BUILDS</b> macOS 26 / arm64</span>
+    <span class="stat"><b>5,481</b> lines C++</span>
+    <span class="stat"><b>13</b> source files</span>
+    <span class="stat"><b>1</b> translation unit</span>
+    <span class="stat"><b>17</b> SGI textures</span>
+  </div>
+</header>
+
+<section>
+  <h2>What it is</h2>
+  <p>A third-person arena shooter. You drive a tank across a 66&times;127 tile map, trip ambush triggers that spawn wall turrets, collect weapon and health pickups, and eventually wake a boss — a two-part armoured train that rolls in on rails, opens its doors, and fires at you.</p>
+  <p>No engine, no scene graph, no asset pipeline, no dependency beyond GLUT. Every polygon is a hand-authored vertex table typed into a <code>const GLfloat</code> array. The entire build is one command, because <code>tankmain.cp</code> <code>#include</code>s the other twelve <code>.cp</code> files directly — the whole game is a single translation unit.</p>
+</section>
+
+<section>
+  <h2>The level is ASCII art</h2>
+  <p>The map lives in <code>GLConstants.cp</code> as a literal <code>const int OriginalMap[66 * 127]</code>. Single-letter <code>const int</code> aliases make it readable as a picture while compiling to a plain array of integers. This is the whole level format — there is nothing else.</p>
+  <div class="legend">
+    <span class="lg-w"><b>B</b> wall</span>
+    <span class="lg-t"><b>T</b> tower</span>
+    <span>X floor</span>
+    <span class="lg-r"><b>I H</b> rail</span>
+    <span class="lg-r"><b>A</b> arch</span>
+    <span class="lg-p"><b>R D M</b> pickup</span>
+    <span class="lg-x"><b>2–9</b> ambush trigger</span>
+  </div>
+  <div class="mapframe"><pre id="map" aria-label="Excerpt of the game map rendered as ASCII art"></pre></div>
+  <p class="caption">Rows 0–7 and 40–52 of the map, commas removed. The <b>8</b> running down the left arena is a one-shot trigger: drive over it and five turrets spawn at hard-coded coordinates. Cell <b>9</b> wakes the boss.</p>
+</section>
+
+<section>
+  <h2>What had to change</h2>
+  <p>Less than nineteen years of bit-rot would suggest. The frameworks it needs — <code>GLUT.framework</code> and <code>OpenGL.framework</code> — are deprecated on macOS but still present and functional in the macOS 26 SDK.</p>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>Change</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td class="k">-std=c++03</td><td>The load-bearing flag. ~200 <code>GLfloat</code> vertex-table entries narrow <code>double</code>&rarr;<code>float</code> in braced initialisers — legal in C++03, a hard error from C++11 on.</td></tr>
+      <tr><td class="k">sky1.sgi fallback</td><td>The archive is incomplete. The loader wants 16 textures; this one is missing, and the original called <code>exit(1)</code>, so the game died before opening a window.</td></tr>
+      <tr><td class="k">drop Carbon.h</td><td>Included in two files, used in neither. A dead Apple-only API blocking non-Apple builds.</td></tr>
+      <tr><td class="k">asset paths</td><td>Textures were <code>fopen</code>ed by bare filename, so it only ran from one working directory.</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p>Plus three genuine bugs fixed: the projection aspect ratio was hard-wired to <code>height/height</code> (so <em>1.0</em>, squashing the scene in any non-square window), <code>glutInitDisplayMode</code> was called <em>after</em> <code>glutCreateWindow</code> where it has no effect, and <code>glEnable(GL_SHADE_MODEL)</code> is not a valid call at all.</p>
+</section>
+
+<section>
+  <h2>The one open bug</h2>
+  <div class="callout">
+    <p class="hd">Out-of-bounds write &middot; MainGameRoutines.cp:151</p>
+    <p>The trigger-clearing loop uses <code>&lt;=</code> on both bounds. <code>Map</code> holds 8,382 <code>int</code>s; the maximum index computed is <code>66 + 66&times;127</code> = <b>8,448</b> — so it reads, and conditionally writes, <b>264 bytes past the end of the array</b>, every time an ambush fires.</p>
+    <p>It has never visibly crashed because <code>Map</code> is a global and whatever follows it in BSS absorbs the damage. It is still undefined behaviour, and Emscripten's bounds-checked heap will trap on it. The fix is two characters.</p>
+  </div>
+  <p>Fifteen other findings — a stale event-queue reset, a missing <code>break</code> that silently grants rapid fire when you wake the boss, an unchecked RLE decoder — are catalogued in <code>docs/FINDINGS.md</code>. Three blockers, six real bugs, six hazards, three minor.</p>
+</section>
+
+<section>
+  <h2>Could it run in a browser?</h2>
+  <p>Yes, and more easily than the age of the code suggests — because of one fact that dominates everything else: <b>this game has no lighting.</b> Not one <code>glLight*</code>, <code>glMaterial*</code> or <code>glNormal3f</code> call outside <code>glutSolidSphere</code>. Fixed-function lighting is normally the hardest part of an OpenGL 1.x migration, and there is none of it here.</p>
+  <p>What remains is the complete gap list between what the game uses and what WebGL provides:</p>
+  <div class="tbl">
+  <table>
+    <thead><tr><th>Feature</th><th class="n">Uses</th><th>Cost</th><th>Approach</th></tr></thead>
+    <tbody>
+      <tr><td class="k">GL_QUAD_STRIP</td><td class="n">69</td><td><span class="chip c-triv">trivial</span></td><td>Quad and triangle strips have <em>identical</em> vertex ordering. An enum swap.</td></tr>
+      <tr><td class="k">GL_POLYGON</td><td class="n">4</td><td><span class="chip c-triv">trivial</span></td><td>&rarr; <code>GL_TRIANGLE_FAN</code>. Valid for convex shapes.</td></tr>
+      <tr><td class="k">glBegin/glEnd</td><td class="n">73</td><td><span class="chip c-easy">easy</span></td><td>~150-line batching shim into a vertex buffer.</td></tr>
+      <tr><td class="k">matrix stack</td><td class="n">112</td><td><span class="chip c-easy">easy</span></td><td>Two 4&times;4 stacks, standard builders. ~200 lines.</td></tr>
+      <tr><td class="k">gluLookAt / Perspective</td><td class="n">6</td><td><span class="chip c-easy">easy</span></td><td>Textbook. GLU does not exist in Emscripten.</td></tr>
+      <tr><td class="k">glutSolidSphere</td><td class="n">7</td><td><span class="chip c-easy">easy</span></td><td>Lat/long tessellation. Must emit normals.</td></tr>
+      <tr><td class="k">glTexGeni</td><td class="n">19</td><td><span class="chip c-hard">the work</span></td><td>Three generation modes, none in WebGL. See below.</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Why <code>glTexGeni</code> is the real problem — and why it is tractable</h3>
+  <p>The game emits <b>zero</b> <code>glTexCoord2f</code> calls. Every texture coordinate in the game is generated by the fixed pipeline: <code>GL_OBJECT_LINEAR</code> for ground and walls, <code>GL_EYE_LINEAR</code> for turrets, <code>GL_SPHERE_MAP</code> for the boss's chrome. None of it exists in WebGL, and it is the specific thing Emscripten's <code>LEGACY_GL_EMULATION</code> is weakest at.</p>
+  <p>The saving grace: <b>the game never sets a custom texgen plane.</b> All planes are OpenGL defaults, so the three modes collapse to simple functions of vertex position and normal — both of which an immediate-mode shim already holds at <code>glVertex3f</code> time. The coordinates can be computed on the CPU inside the shim and handed to WebGL as a plain interleaved buffer. No shader gymnastics, no per-mode variants.</p>
+  <p>Estimated total: <b>600–900 lines of shim</b>. The recommended route writes it by hand against GLES2 rather than leaning on <code>LEGACY_GL_EMULATION</code> — because the same shim then also delivers modern native rendering on Linux and Windows, and gets macOS off the deprecated frameworks. One rendering path everywhere.</p>
+
+  <h3>Two traps worth naming early</h3>
+  <p><b>Frame timing.</b> The game is fully frame-locked: every duration is <code>seconds &times; FRAME_RATE</code>, the timer is <code>1000/80</code> — integer division, so 12&nbsp;ms, so 83.3&nbsp;fps rather than the intended 80. In a browser you get whatever <code>requestAnimationFrame</code> gives you. At 60&nbsp;Hz the game runs <b>26% slow</b>; at 120&nbsp;Hz it runs 44% fast. A fixed-timestep accumulator fixes it while keeping every existing frame-counted constant valid.</p>
+  <p><b>Texture uploads.</b> There is not a single <code>glGenTextures</code> or <code>glBindTexture</code> in the codebase. Every texture change re-uploads a full 256&times;256 RGBA image — 15 times per frame, <b>3.9&nbsp;MB per frame, ~326&nbsp;MB/s</b> — to switch between 16 images that never change. Survivable in 2007. Browsers will not tolerate it. This is ~30 lines to fix and is mandatory before WebGL.</p>
+</section>
+
+<section>
+  <h2>The road, in order</h2>
+  <div class="level done">
+    <div class="lvnum">0</div>
+    <div class="lvbody">
+      <h3>macOS native &check;</h3>
+      <p>Done. Two real changes plus three bug fixes. Builds clean, runs, plays.</p>
+      <p class="lvmeta">SHIPPED</p>
+    </div>
+  </div>
+  <div class="level">
+    <div class="lvnum">1</div>
+    <div class="lvbody">
+      <h3>Correct and portable natively</h3>
+      <p>Fix the out-of-bounds write. Add texture objects. Replace GLUT with GLFW — only 13 entry points, and the game already bypasses the display callback. Gets you Linux and Windows.</p>
+      <p class="lvmeta">1–2 DAYS</p>
+    </div>
+  </div>
+  <div class="level">
+    <div class="lvnum">2</div>
+    <div class="lvbody">
+      <h3>WebAssembly</h3>
+      <p>Spike Emscripten's legacy layer for half a day to decide the route, then build the shim natively — diffing against the working macOS build at every stage — and only compile to WASM once the graphics work is finished.</p>
+      <p class="lvmeta">1–2 WEEKS</p>
+    </div>
+  </div>
+  <div class="level">
+    <div class="lvnum">3</div>
+    <div class="lvbody">
+      <h3>Modernisation</h3>
+      <p>Split the unity build, vertex buffers, cull the five full-map draw passes, lift the level out into a data file. Optional — and the least interesting of the three. Don't let it block Level 2.</p>
+      <p class="lvmeta">OPTIONAL</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>Run it</h2>
+  <pre class="sh">cd /Users/karl/Downloads/tank-2007-revival
+make run
+
+<span class="c"># W A S D  drive · mouse  aim · space  fire
+# P  pause · 1  top view · 0  normal · + −  sensitivity</span></pre>
+  <p class="caption"><code>original/</code> holds the 2007 files byte-for-byte and is never edited. <code>src/</code> is the working copy; every divergence carries a <code>[2026 port]</code> comment saying what changed and why. Four files have substantive changes — the rest is one include swap.</p>
+</section>
+
+<footer>
+  <p>Original game, engine and artwork by <b>Ed Martin</b>, September–November 2007. SGI image loading in <code>GLTextures.cp</code> by <b>Silicon Graphics</b>, via the Xcode sample projects.</p>
+  <p>His own <code>Readme.txt</code> is unusually good — a full architectural tour, written in 2007, including a candid list of things he wanted to warn you about. It is the reason this took hours rather than days.</p>
+</footer>
+
+</div>
+
+<script>
+// The map excerpt is real data lifted from GLConstants.cp (commas striped at extract time).
+const ROWS = [
+"000BTBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBTTTTTTBBBBBBBBBBBBBBTT000000",
+"000BXXXXXXXXXXXXXXXXXXXX8XXXXXXXXXXXXBBBBBTBBXXXXXXXXXXXXXBT000000",
+"000TXXXXXXXXXXXXXXXXXXXX8XXXXXXXXXXXXXXX8BBBXXXXXXXXXXXXXXBB000000",
+"000TTXXXXXXXXXXXXXXXXXXX8XXXXXXXXXXXXXXX8XBXXXXXXXXXXXXXXXB0000000",
+"000TTXXXXXXXXXXXXXXXXXBX8XXXXXXXBXXXXXXX8XXXXXXXXBXXXXXXXXB0000000",
+"000TXXXXXXXXXXXXXXXXXXBX8XXXXXXBTBXXXXXX8XXXXXXXXBXXXXXXXXBB000000",
+"000BXXXXXXXXXXXXXXXXXXBX8XXXXXXXBXXXXXXX8XXXXXXXBBBXXXXXXXBT000000",
+"000BTB222222XBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBTBBBBBBBBTT000000",
+"",
+"0000000BBXXXXXXXBB0000000000000BXXXXXXXXXXXXXXXXXXXXXXXBTTTIXXTTT0",
+"00000000BBXXXXXBB00000000000000BBBBBBBBBBBBBBBBBBBBBBBBBBBBIHXBBT0",
+"00000000BBXXXXXBB0000000000000000000000000000000000000000BAIHXBB00",
+"000000BBBXXXXXXXBBB00000000000000000000000000000000000000BBIHIBB00",
+"0000BBB66666666666BBB000000000000000000000000000000000000BBXHIBB00"
+];
+
+const CLS = {
+  "0":"g", "X":"f", "B":"w", "T":"t",
+  "I":"r", "H":"r", "A":"a",
+  "R":"p", "D":"p", "M":"p"
+};
+
+const el = document.getElementById("map");
+let html = "";
+for (const row of ROWS) {
+  if (row === "") { html += "\n"; continue; }
+  for (const ch of row) {
+    const cls = CLS[ch] || (ch >= "2" && ch <= "9" ? "x" : "f");
+    html += '<span class="' + cls + '">' + ch + "</span>";
+  }
+  html += "\n";
+}
+el.innerHTML = html;
+</script>
+</body>
+</html>

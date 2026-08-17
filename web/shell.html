@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tank (2007)</title>
+<style>
+  :root{
+    --ground:#131513; --panel:#1C1F1C; --line:#333832;
+    --ink:#DEE1DA; --muted:#868C83; --accent:#E4703F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    background:var(--ground); color:var(--ink);
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px; padding:20px;
+  }
+  h1{
+    font-size:13px; letter-spacing:.18em; text-transform:uppercase;
+    font-weight:600; margin:0; color:var(--muted);
+  }
+  h1 b{color:var(--accent); font-weight:600;}
+  #frame{position:relative; line-height:0;}
+  canvas{
+    display:block; background:#000; border:1px solid var(--line);
+    max-width:100%; height:auto; image-rendering:auto;
+  }
+  canvas:focus{outline:2px solid var(--accent); outline-offset:2px;}
+  #overlay{
+    position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:10px;
+    background:rgba(10,12,10,.86); color:var(--ink); cursor:pointer;
+    text-align:center; padding:24px; line-height:1.6;
+  }
+  #overlay.hidden{display:none;}
+  #overlay strong{font-size:15px; letter-spacing:.1em; text-transform:uppercase; color:var(--accent);}
+  #overlay span{font-size:12px; color:var(--muted); max-width:46ch;}
+  #status{
+    font-size:11.5px; color:var(--muted); letter-spacing:.05em;
+    min-height:1.4em; text-align:center;
+  }
+  #keys{
+    display:flex; flex-wrap:wrap; gap:6px 16px; justify-content:center;
+    font-size:11px; color:var(--muted); letter-spacing:.04em; max-width:900px;
+  }
+  #keys b{color:var(--ink); font-weight:600;}
+  footer{font-size:11px; color:var(--muted); text-align:center; line-height:1.7;}
+  footer a{color:var(--accent);}
+</style>
+</head>
+<body>
+
+<h1>Tank <b>2007</b> &middot; Ed Martin &middot; running in WebAssembly</h1>
+
+<div id="frame">
+  <canvas id="canvas" width="1200" height="680" tabindex="-1"
+          oncontextmenu="event.preventDefault()"></canvas>
+  <div id="overlay">
+    <strong>Click to play</strong>
+    <span>The mouse pointer is captured so the turret can turn freely &mdash; press <b>Esc</b> to release it.</span>
+  </div>
+</div>
+
+<div id="status">loading&hellip;</div>
+
+<div id="keys">
+  <span><b>W A S D</b> drive</span>
+  <span><b>mouse</b> aim turret</span>
+  <span><b>space</b> fire</span>
+  <span><b>P</b> pause</span>
+  <span><b>1</b> top view</span>
+  <span><b>0</b> normal view</span>
+  <span><b>+ &minus;</b> sensitivity</span>
+</div>
+
+<footer>
+  Fixed-function OpenGL 1.x from 2007, running on WebGL through a hand-written shim.<br>
+  Click the start screen&rsquo;s <b>EASY / MEDIUM / HARD</b> to begin.
+</footer>
+
+<script>
+  var canvas  = document.getElementById('canvas');
+  var overlay = document.getElementById('overlay');
+  var statusEl= document.getElementById('status');
+
+  // Pointer lock. The game computes turret movement from deltas between successive absolute
+  // mouse positions, which dead-ends at the window edge (the author flags this in his 2007
+  // readme). Under pointer lock Emscripten feeds GLUT an ever-accumulating coordinate, so the
+  // same delta arithmetic works without limit.
+  var wasLocked = false;
+
+  // Pointer lock is deliberately NOT requested here. The start screen picks its difficulty by
+  // hit-testing the absolute mouse position, and under pointer lock the browser reports only
+  // relative movement -- which Emscripten accumulates into an ever-growing coordinate, so the
+  // buttons can never be hit. Lock is deferred until the player presses a movement key, by which
+  // point they are past the menu and actually driving.
+  overlay.addEventListener('click', function () {
+    canvas.focus();
+    overlay.classList.add('hidden');
+    statusEl.textContent = 'pick a difficulty — W A S D will capture the mouse';
+  });
+
+  window.addEventListener('keydown', function (e) {
+    var k = e.key.toLowerCase();
+    if (['w', 'a', 's', 'd'].indexOf(k) !== -1 &&
+        !document.pointerLockElement && canvas.requestPointerLock) {
+      canvas.requestPointerLock();
+      statusEl.textContent = 'mouse captured — Esc to release';
+    }
+  });
+
+  // Only bring the overlay back when a lock we actually held is released (the user pressed Esc).
+  // If the lock never engaged -- some browsers refuse it without a user gesture they trust -- the
+  // game is still perfectly playable with a free cursor, so don't cover it back up.
+  document.addEventListener('pointerlockchange', function () {
+    if (document.pointerLockElement === canvas) {
+      wasLocked = true;
+    } else if (wasLocked) {
+      wasLocked = false;
+      overlay.classList.remove('hidden');
+    }
+  });
+
+  // Space and the arrow keys would otherwise scroll the page out from under the game.
+  window.addEventListener('keydown', function (e) {
+    if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) !== -1) {
+      e.preventDefault();
+    }
+  }, { passive: false });
+
+  var Module = {
+    canvas: canvas,
+    print:    function (t) { console.log(t); },
+    printErr: function (t) { console.warn(t); },
+    setStatus: function (t) {
+      statusEl.textContent = t || 'ready — click to play';
+    },
+    onRuntimeInitialized: function () {
+      statusEl.textContent = 'ready — click to play';
+    }
+  };
+  Module.setStatus('loading…');
+</script>
+
+{{{ SCRIPT }}}
+</body>
+</html>

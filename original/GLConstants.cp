@@ -1,0 +1,492 @@
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////		
+////	File:			GLConstants.cp																															
+////	Author:			Ed Martin
+////	Description:	The Data for the draw functions in GLGameObjectDrawFunctions.cp, and the text Map used in the game															
+////		
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include <Carbon/Carbon.h>
+#include <GLUT/glut.h>
+
+#include "GameConstants.cp"
+
+int Map[66 * 127];
+const int OriginalMap[66 * 127] = 
+{
+0,0,0,B,T,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,T,T,T,T,T,T,B,B,B,B,B,B,B,B,B,B,B,B,B,B,T,T,0,0,0,0,0,0,
+0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,8,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,B,B,T,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,0,0,0,0,0,0,
+0,0,0,T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,8,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,8,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,0,0,0,0,0,0,
+0,0,0,T,T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,8,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,8,X,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,
+0,0,0,T,T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,X,8,X,X,X,X,X,X,X,B,X,X,X,X,X,X,X,8,X,X,X,X,X,X,X,X,B,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,
+0,0,0,T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,X,8,X,X,X,X,X,X,B,T,B,X,X,X,X,X,X,8,X,X,X,X,X,X,X,X,B,X,X,X,X,X,X,X,X,B,B,0,0,0,0,0,0,
+0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,X,8,X,X,X,X,X,X,X,B,X,X,X,X,X,X,X,8,X,X,X,X,X,X,X,B,B,B,X,X,X,X,X,X,X,B,T,0,0,0,0,0,0,
+0,0,0,B,T,B,2,2,2,2,2,2,X,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,T,B,B,B,B,B,B,B,B,T,T,0,0,0,0,0,0,
+0,0,0,0,0,B,X,X,X,X,X,X,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,T,T,T,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,B,X,X,X,X,X,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,B,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,B,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,B,3,3,3,3,3,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,B,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,B,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,0,
+0,0,0,0,0,B,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+0,0,0,0,0,B,X,X,X,X,X,B,B,B,B,B,B,B,B,B,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,B,T,T,T,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,M,X,X,X,B,B,B,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,T,B,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,T,B,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,B,B,B,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,T,B,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,X,X,X,B,B,B,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,T,B,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,T,B,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,T,B,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,X,X,X,B,B,B,X,X,B,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,B,B,B,B,B,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,T,B,X,X,X,X,X,X,X,X,B,0,
+T,X,X,X,X,X,X,X,B,B,B,B,B,B,B,B,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,T,B,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,T,B,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,B,B,B,B,B,B,B,B,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,R,X,X,X,B,B,B,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,5,X,X,X,X,X,X,X,X,X,X,B,B,B,B,B,B,B,B,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,5,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,5,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,T,T,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,5,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,5,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,
+B,X,X,X,X,X,X,X,5,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,4,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,I,X,X,X,X,B,0,
+B,B,B,B,B,B,B,B,5,X,X,X,X,X,X,X,X,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,X,I,X,X,B,B,B,0,
+0,0,0,0,0,0,0,B,B,X,X,X,X,X,X,X,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,T,T,I,X,X,T,T,T,0,
+0,0,0,0,0,0,0,0,B,B,X,X,X,X,X,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,I,H,X,B,B,T,0,
+0,0,0,0,0,0,0,0,B,B,X,X,X,X,X,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,A,I,H,X,B,B,0,0,
+0,0,0,0,0,0,B,B,B,X,X,X,X,X,X,X,B,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+0,0,0,0,B,B,B,6,6,6,6,6,6,6,6,6,6,6,B,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,X,H,I,B,B,0,0,
+0,0,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,X,H,I,B,B,0,0,
+B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,X,X,I,B,B,0,0,
+T,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,X,X,I,B,B,0,0,
+T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,X,X,I,B,B,0,0,
+T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,A,I,H,I,B,B,0,0,
+T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,X,H,I,B,B,0,0,
+T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,T,T,T,T,T,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+T,X,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,X,T,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+T,B,B,T,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,B,T,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+T,X,B,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,X,T,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,T,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+T,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,T,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,B,X,X,X,X,X,X,X,X,X,X,T,T,T,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,A,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,B,T,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,B,X,X,X,X,X,X,X,X,X,X,X,B,B,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,B,T,B,X,X,X,X,X,X,X,X,X,X,B,T,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,A,I,H,I,B,B,0,0,
+B,X,X,X,X,B,X,X,X,X,X,X,X,X,X,X,X,B,T,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,B,X,X,X,X,X,B,X,B,T,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,B,T,B,X,X,X,B,T,X,B,T,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,B,X,X,X,X,X,B,X,B,T,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,B,B,B,0,0,B,B,B,B,B,B,B,I,H,I,B,B,0,0,
+B,X,X,D,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,X,X,X,X,X,X,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,B,B,B,B,0,0,B,B,B,B,B,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,B,T,B,B,B,B,B,B,B,B,B,B,T,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,A,X,X,X,B,0,0,A,X,X,X,B,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,X,B,B,B,X,X,X,X,X,X,B,B,B,T,T,T,T,T,T,T,T,T,T,T,T,0,0,0,0,0,0,0,0,0,B,B,B,B,B,0,B,X,X,X,B,0,0,B,X,X,X,B,B,B,I,H,I,B,B,0,0,
+B,B,B,B,B,B,B,T,B,X,X,X,X,X,X,B,T,B,T,T,T,T,T,T,T,T,T,T,T,T,0,0,0,0,0,0,0,0,0,A,I,H,I,B,0,B,X,X,X,B,0,0,B,X,X,X,B,B,A,I,H,I,B,B,0,0,
+B,B,B,B,B,B,B,B,B,X,X,X,X,X,X,B,B,B,T,T,T,T,T,T,T,T,T,T,T,T,0,0,0,0,0,0,0,0,0,B,I,H,I,B,0,B,X,X,X,B,0,0,B,X,X,X,B,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,7,X,X,X,X,X,X,X,X,X,X,X,X,7,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,I,H,I,B,0,B,X,X,X,B,0,0,B,X,X,X,B,B,B,I,H,I,B,B,0,0,
+B,X,T,X,X,7,X,X,X,X,X,X,X,X,X,X,X,X,7,X,X,X,T,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,I,H,I,B,0,B,X,X,X,B,0,0,B,X,X,X,B,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,7,X,X,X,X,X,X,X,X,X,X,X,X,7,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,I,H,I,B,0,B,X,X,X,B,0,0,B,X,X,X,B,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,7,X,X,X,X,X,X,X,X,X,X,X,X,7,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,I,H,I,B,0,B,X,X,X,B,0,0,B,X,X,X,B,B,B,I,H,I,B,B,0,0,
+B,X,X,X,X,7,7,7,7,7,7,7,7,7,7,7,7,7,7,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,T,B,T,B,I,H,I,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,T,I,H,I,B,B,B,T,
+B,X,X,X,X,X,X,X,X,X,X,M,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,B,B,B,X,X,X,B,B,B,B,X,X,X,B,B,B,I,H,I,B,B,T,T,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,I,H,I,B,B,T,T,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,I,H,I,B,B,B,T,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,9,X,X,X,X,X,I,H,I,B,B,B,T,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,9,I,9,9,9,9,9,9,X,X,X,X,9,X,X,X,X,X,I,H,I,B,B,T,T,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,T,B,T,B,I,H,I,X,X,X,X,X,X,9,X,X,X,9,X,X,X,X,X,I,H,I,B,B,T,T,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,X,X,X,X,X,X,X,9,X,X,9,X,X,X,X,X,I,H,I,B,B,B,T,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,0,0,0,0,0,0,0,0,0,0,B,B,T,B,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,T,T,T,T,T,T,T,T,T,T,T,T,T,B,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,T,B,B,B,B,B,B,B,B,B,B,B,B,B,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,X,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,X,B,0,T,B,B,B,X,X,X,X,X,X,X,X,X,X,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,T,
+//0000000000000000001111111111111111111122222222222222222222333333333333333333334444444444444444444455555555555555555555666666666666666666667 
+//012,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0
+B,X,T,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,T,X,B,0,T,B,B,B,X,X,X,X,X,X,X,X,X,X,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,T,T,
+B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,0,T,B,B,B,X,X,M,X,X,X,X,X,X,X,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,T,
+B,X,X,X,B,B,B,X,B,X,X,X,X,X,B,X,B,B,B,X,X,X,X,X,B,0,T,B,B,B,X,X,X,X,X,X,X,X,X,X,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,X,X,X,B,T,B,X,X,X,X,X,X,X,X,X,B,T,B,X,X,X,X,X,B,0,T,B,B,B,X,X,X,X,X,X,X,X,X,X,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,X,X,X,B,T,T,T,T,T,X,X,X,T,T,T,T,T,B,X,X,X,X,X,B,0,T,B,B,B,X,X,X,X,X,B,B,B,B,B,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,B,
+B,X,X,X,B,T,X,B,B,X,X,X,X,X,B,T,X,T,B,X,X,X,X,X,B,0,T,B,B,B,X,X,X,X,X,B,T,T,T,B,I,H,I,X,X,X,X,X,X,X,X,9,X,9,X,X,X,X,X,I,H,I,B,B,B,T,
+T,T,T,T,T,T,X,B,B,X,X,X,X,X,B,T,T,T,T,T,T,T,T,T,T,T,T,B,B,B,X,X,X,X,X,B,T,B,T,B,I,H,I,X,X,X,X,X,X,X,9,X,X,9,X,X,X,X,X,I,H,I,B,B,T,T,
+B,B,B,B,B,B,X,B,B,X,X,X,X,X,B,T,T,T,T,B,B,B,B,B,B,B,B,B,B,B,X,X,X,X,X,B,T,B,T,B,I,H,I,X,X,X,X,X,X,9,X,D,X,X,9,X,X,X,X,I,H,I,B,B,T,T,
+0,0,0,0,0,0,0,B,B,X,X,X,X,X,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,X,X,X,X,X,B,T,B,T,B,I,9,I,9,9,9,9,9,9,X,X,X,X,X,X,9,9,9,9,I,9,I,B,B,B,T,
+0,0,0,0,0,0,0,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,I,H,I,B,B,B,B,
+0,0,0,0,0,0,0,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,I,H,I,B,B,B,B,
+0,0,0,0,0,0,0,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,I,H,I,B,B,B,B,
+0,0,0,0,0,0,0,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,I,H,I,B,B,B,T,
+0,0,0,0,0,0,0,B,B,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,B,T,B,T,B,I,H,I,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,X,I,H,I,B,B,T,T,
+0,0,0,0,0,0,0,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,T,B,T,A,I,H,I,B,B,B,T,B,B,B,T,T,B,B,B,T,B,B,A,I,H,I,B,B,T,T,
+//0000000000000000001111111111111111111122222222222222222222333333333333333333334444444444444444444455555555555555555555666666666666666666667
+//012,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0,1,2,3,4,5,6,7,8,9,0
+0,0,0,0,0,0,0,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,B,T,B,B,B,I,H,I,B,B,T,T,T,B,B,T,T,B,B,T,T,T,B,B,I,H,I,B,B,B,T,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,I,H,I,B,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,H,I,B,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,I,0,I,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,H,I,B,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,B,I,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,0,I,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,0,I,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,I,0,0,0,0
+
+};
+
+GLfloat ground[4*3] = 
+{
+	0,						0,						0,
+	MAP_BLOCK_SIZE,			0,						0,
+	0,						0,						MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			0,						MAP_BLOCK_SIZE 
+};
+
+GLfloat wall[8*3] = 
+{
+	0.5*MAP_BLOCK_SIZE,		0,						0.5*MAP_BLOCK_SIZE,
+	0.5*MAP_BLOCK_SIZE,		1.5*MAP_BLOCK_SIZE,		0.5*MAP_BLOCK_SIZE,
+	-0.5*MAP_BLOCK_SIZE,	0,						0.5*MAP_BLOCK_SIZE,
+	-0.5*MAP_BLOCK_SIZE,	1.5*MAP_BLOCK_SIZE,		0.5*MAP_BLOCK_SIZE,
+
+	0.5*MAP_BLOCK_SIZE,		0,						-0.5*MAP_BLOCK_SIZE,
+	0.5*MAP_BLOCK_SIZE,		1.5*MAP_BLOCK_SIZE,		-0.5*MAP_BLOCK_SIZE,
+	-0.5*MAP_BLOCK_SIZE,	0,						-0.5*MAP_BLOCK_SIZE,
+	-0.5*MAP_BLOCK_SIZE,	1.5*MAP_BLOCK_SIZE,		-0.5*MAP_BLOCK_SIZE,
+};
+
+GLfloat tower[8*3] = 
+{
+	0.5*MAP_BLOCK_SIZE,		0,						0.5*MAP_BLOCK_SIZE,
+	0.5*MAP_BLOCK_SIZE,		9.5*MAP_BLOCK_SIZE,		0.5*MAP_BLOCK_SIZE,
+	-0.5*MAP_BLOCK_SIZE,	0,						0.5*MAP_BLOCK_SIZE,
+	-0.5*MAP_BLOCK_SIZE,	9.5*MAP_BLOCK_SIZE,		0.5*MAP_BLOCK_SIZE,
+
+	0.5*MAP_BLOCK_SIZE,		0,						-0.5*MAP_BLOCK_SIZE,
+	0.5*MAP_BLOCK_SIZE,		9.5*MAP_BLOCK_SIZE,		-0.5*MAP_BLOCK_SIZE,
+	-0.5*MAP_BLOCK_SIZE,	0,						-0.5*MAP_BLOCK_SIZE,
+	-0.5*MAP_BLOCK_SIZE,	9.5*MAP_BLOCK_SIZE,		-0.5*MAP_BLOCK_SIZE,
+};
+
+GLfloat rail1[16*3] = 
+{
+	0,						-0.2 * MAP_BLOCK_SIZE,		0.3 * MAP_BLOCK_SIZE,
+	0,						-0.2 * MAP_BLOCK_SIZE,		0.7 * MAP_BLOCK_SIZE,
+	0,						0.08,						0.3 * MAP_BLOCK_SIZE,
+	0,						0.08,						0.7 * MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			0.08,						0.3 * MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			0.08,						0.7 * MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			0.08,						0.3 * MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			0.08,						0.7 * MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			-0.2 * MAP_BLOCK_SIZE,		0.7 * MAP_BLOCK_SIZE,
+	0,						-0.2 * MAP_BLOCK_SIZE,		0.7 * MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			0.08,						0.7 * MAP_BLOCK_SIZE,
+	0,						0.08,						0.7 * MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			0.08,						0.3 * MAP_BLOCK_SIZE,
+	0,						0.08,						0.3 * MAP_BLOCK_SIZE,
+	MAP_BLOCK_SIZE,			-0.2 * MAP_BLOCK_SIZE,		0.3 * MAP_BLOCK_SIZE,
+	0,						-0.2 * MAP_BLOCK_SIZE,		0.3 * MAP_BLOCK_SIZE
+};
+
+
+GLfloat rail2[16*3] = 
+{
+	0.4 * MAP_BLOCK_SIZE,	-0.2 * MAP_BLOCK_SIZE,	0,
+	0.4 * MAP_BLOCK_SIZE,	-0.2 * MAP_BLOCK_SIZE,	MAP_BLOCK_SIZE,
+	0.4 * MAP_BLOCK_SIZE,	0.09,					0,
+	0.4 * MAP_BLOCK_SIZE,	0.09,					MAP_BLOCK_SIZE,
+	0.6 * MAP_BLOCK_SIZE,	0.09,					0,
+	0.6 * MAP_BLOCK_SIZE,	0.09,					MAP_BLOCK_SIZE,
+	0.6 * MAP_BLOCK_SIZE,	0.09,					0,
+	0.6 * MAP_BLOCK_SIZE,	0.09,					MAP_BLOCK_SIZE,
+	0.6 * MAP_BLOCK_SIZE,	-0.2 * MAP_BLOCK_SIZE,	MAP_BLOCK_SIZE,
+	0.4 * MAP_BLOCK_SIZE,	-0.2 * MAP_BLOCK_SIZE,	MAP_BLOCK_SIZE,
+	0.6 * MAP_BLOCK_SIZE,	0.09,					MAP_BLOCK_SIZE,
+	0.4 * MAP_BLOCK_SIZE,	0.09,					MAP_BLOCK_SIZE,
+	0.6 * MAP_BLOCK_SIZE,	0.09,					0,
+	0.4 * MAP_BLOCK_SIZE,	0.09,					0,
+	0.6 * MAP_BLOCK_SIZE,	-0.2 * MAP_BLOCK_SIZE,	0,
+	0.4 * MAP_BLOCK_SIZE,	-0.2 * MAP_BLOCK_SIZE,	0
+};
+
+GLfloat arch1[3*28] = 
+{
+	-0.01 * MAP_BLOCK_SIZE,		0,						0,
+	1.01 * MAP_BLOCK_SIZE,		0,						0,
+	-0.01 * MAP_BLOCK_SIZE,		3 * MAP_BLOCK_SIZE,		0,
+	1.01 * MAP_BLOCK_SIZE,		3 * MAP_BLOCK_SIZE,		0,
+	0.2 * MAP_BLOCK_SIZE,		4.2 * MAP_BLOCK_SIZE,	0,
+	1.1 * MAP_BLOCK_SIZE,		3.6 * MAP_BLOCK_SIZE,	0,
+	0.8 * MAP_BLOCK_SIZE,		5 * MAP_BLOCK_SIZE,		0,
+	1.4 * MAP_BLOCK_SIZE,		4.2 * MAP_BLOCK_SIZE,	0,
+	1.6 * MAP_BLOCK_SIZE,		5.4 * MAP_BLOCK_SIZE,	0,
+	1.8 * MAP_BLOCK_SIZE,		4.4 * MAP_BLOCK_SIZE,	0,
+	2.028 * MAP_BLOCK_SIZE,		5.4 * MAP_BLOCK_SIZE,	0,
+	2.170 * MAP_BLOCK_SIZE,		4.4 * MAP_BLOCK_SIZE,	0,
+	2 * MAP_BLOCK_SIZE,			5.6 * MAP_BLOCK_SIZE,	0,
+	2.2 * MAP_BLOCK_SIZE,		4.2 * MAP_BLOCK_SIZE,	0,
+	3 * MAP_BLOCK_SIZE,			5.6 * MAP_BLOCK_SIZE,	0,
+	2.8 * MAP_BLOCK_SIZE,		4.2 * MAP_BLOCK_SIZE,	0,  ////
+	2.85 * MAP_BLOCK_SIZE,		5.4 * MAP_BLOCK_SIZE,	0,
+	2.14 * MAP_BLOCK_SIZE,		4.4 * MAP_BLOCK_SIZE,	0,
+	3.4 * MAP_BLOCK_SIZE,		5.4 * MAP_BLOCK_SIZE,	0,
+	3.2 * MAP_BLOCK_SIZE,		4.4 * MAP_BLOCK_SIZE,	0,
+	4.2 * MAP_BLOCK_SIZE,		5 * MAP_BLOCK_SIZE,		0,
+	3.6 * MAP_BLOCK_SIZE,		4.2 * MAP_BLOCK_SIZE,	0,
+	4.8 * MAP_BLOCK_SIZE,		4.2 * MAP_BLOCK_SIZE,	0,
+	3.9 * MAP_BLOCK_SIZE,		3.6 * MAP_BLOCK_SIZE,	0,
+	5.01 * MAP_BLOCK_SIZE,		3 * MAP_BLOCK_SIZE,		0,
+	3.99 * MAP_BLOCK_SIZE,		3 * MAP_BLOCK_SIZE,		0,
+	5.01 * MAP_BLOCK_SIZE,		0,						0,
+	3.99 * MAP_BLOCK_SIZE,		0,						0
+};
+	
+GLfloat rapidfire[3*10] =
+{
+	1.4 * MAP_BLOCK_SIZE,		-0.8 * MAP_BLOCK_SIZE,	0,
+	0.2 * MAP_BLOCK_SIZE,		-0.8 * MAP_BLOCK_SIZE,	0,
+	1   * MAP_BLOCK_SIZE,		0.8 * MAP_BLOCK_SIZE,	0,
+	0.4 * MAP_BLOCK_SIZE,		0.2 * MAP_BLOCK_SIZE,	0,
+	- MAP_BLOCK_SIZE,			0.6 * MAP_BLOCK_SIZE,	0,
+	-0.4 * MAP_BLOCK_SIZE,		0.2 * MAP_BLOCK_SIZE,	0,
+	-0.6 * MAP_BLOCK_SIZE,		-0.2 * MAP_BLOCK_SIZE,	0,
+	0,							-0.4 * MAP_BLOCK_SIZE,	0,
+	-1.6 * MAP_BLOCK_SIZE,		-0.8 * MAP_BLOCK_SIZE,	0,
+	- MAP_BLOCK_SIZE,			-0.8 * MAP_BLOCK_SIZE,	0
+};
+
+GLfloat dualfire[3*8] =
+{
+	1.4 * MAP_BLOCK_SIZE,		-0.8 * MAP_BLOCK_SIZE,	0,
+	0.2 * MAP_BLOCK_SIZE,		-0.8 * MAP_BLOCK_SIZE,	0,
+	1.0 * MAP_BLOCK_SIZE,		0.8 * MAP_BLOCK_SIZE,	0,
+	0.4 * MAP_BLOCK_SIZE,		0.2 * MAP_BLOCK_SIZE,	0,
+	-1.4 * MAP_BLOCK_SIZE,		0.2 * MAP_BLOCK_SIZE,	0,
+	-0.6 * MAP_BLOCK_SIZE,		0,						0,
+	-1.4 * MAP_BLOCK_SIZE,		-0.2 * MAP_BLOCK_SIZE,	0,
+	0.2 * MAP_BLOCK_SIZE,		-0.6 * MAP_BLOCK_SIZE,	0
+};
+
+GLfloat medpack[3*14] = 
+{
+	0.0 * MAP_BLOCK_SIZE,		-0.8 * MAP_BLOCK_SIZE,	0,
+	0.2 * MAP_BLOCK_SIZE,		-0.6 * MAP_BLOCK_SIZE,	0,
+	0.5 * MAP_BLOCK_SIZE,		-0.4 * MAP_BLOCK_SIZE,	0,
+	0.9 * MAP_BLOCK_SIZE,		-0.3 * MAP_BLOCK_SIZE,	0,
+
+	1.2 * MAP_BLOCK_SIZE,		-0.1 * MAP_BLOCK_SIZE,	0,
+	1.4 * MAP_BLOCK_SIZE,		0.1 * MAP_BLOCK_SIZE,	0,
+	1.4 * MAP_BLOCK_SIZE,		0.3 * MAP_BLOCK_SIZE,	0,
+	1.3 * MAP_BLOCK_SIZE,		0.6 * MAP_BLOCK_SIZE,	0,
+	
+	1.2 * MAP_BLOCK_SIZE,		0.7 * MAP_BLOCK_SIZE,	0,
+	1.0 * MAP_BLOCK_SIZE,		0.8 * MAP_BLOCK_SIZE,	0,
+	0.8 * MAP_BLOCK_SIZE,		0.8 * MAP_BLOCK_SIZE,	0,
+	0.2 * MAP_BLOCK_SIZE,		0.7 * MAP_BLOCK_SIZE,	0,
+
+	0.1 * MAP_BLOCK_SIZE,		0.6 * MAP_BLOCK_SIZE,	0,
+	0.0 * MAP_BLOCK_SIZE,		0.4 * MAP_BLOCK_SIZE,	0,
+
+};
+
+GLfloat tankbody[3*10] = 
+{
+	-0.6,	0.2,	0.6,
+	0.6,	0.2,	0.6,
+	-0.6,	0.2,	-0.6,
+	0.6,	0.2,	-0.6,
+	-0.6,	0.4,	-0.6,
+	0.6,	0.4,	-0.6,
+	-0.6,	0.4,	0.6,
+	0.6,	0.4,	0.6,
+	-0.6,	0.2,	0.6,
+	0.6,	0.2,	0.6
+};
+
+GLfloat tanktracks[3*18] = 
+{
+	0.4,	0.6,	0.5,		0.7,	0.6,	0.5,
+	0.4,	0.6,	-0.5,		0.7,	0.6,	-0.5,
+	0.4,	0.45,	-0.7,		0.7,	0.45,	-0.7,
+	0.4,	0.15,	-0.7,		0.7,	0.15,	-0.7,
+	0.4,	0.01,	-0.5,		0.7,	0.01,	-0.5,
+	0.4,	0.01,	0.5,		0.7,	0.01,	0.5,
+	0.4,	0.15,	0.7,		0.7,	0.15,	0.7,
+	0.4,	0.45,	0.7,		0.7,	0.45,	0.7,
+	0.4,	0.6,	0.5,		0.7,	0.6,	0.5
+};
+
+GLfloat tankbarrellength = 1.7;
+
+GLfloat tankturret1[3*16] = 
+{
+	-3,	3,	-2,		3,	3,	-2,
+	-3,	5,	-1.8,	3,	5,	-1.8,
+	-3,	7,	-1.2,	3,	7,	-1.2,
+	-3,	8,	-0.4,	3,	8,	-0.4,
+	-3,	8,	0.4,	3,	8,	0.4,
+	-3,	7,	1.2,	3,	7,	1.2,
+	-3,	5,	1.8,	3,	5,	1.8,
+	-3,	3,	2,		3,	3,	2
+};
+
+float h = 0.3;
+float g = 0.3;
+
+GLfloat tanktower[16*3] = 
+{
+	0.5,	0.4,	0.4,
+	-0.5,	0.4,	0.4,
+	0.0,	1,		0.1,
+	-0.0,	1,		0.1,
+	
+	0.25,	1,		-0.5,
+	-0.25,	1,		-0.5,
+	0.5,	0.4,	-0.55,
+	-0.5,	0.4,	-0.55,
+	
+	0.5,	0.4,	-0.55,
+	0.5,	0.4,	0.4,
+	0.25,	1,		-0.5,
+	0.0,	1,		0.1,
+	
+	-0.25,	1,		-0.5,
+	-0.0,	1,		0.1,	
+	-0.5,	0.4,	-0.55,
+	-0.5,	0.4,	0.4
+};
+
+GLfloat turretwindow[3*18] =
+{
+	-0.6 * ENEMY_TURRET_SIZE,	0.6 * ENEMY_TURRET_SIZE,	0,
+	-0.6 * ENEMY_TURRET_SIZE,	0,							0,
+	-0.6 * ENEMY_TURRET_SIZE,	0.6 * ENEMY_TURRET_SIZE,	1 * ENEMY_TURRET_SIZE,
+	-0.6 * ENEMY_TURRET_SIZE,	0,							1 * ENEMY_TURRET_SIZE,
+	
+	0.6 * ENEMY_TURRET_SIZE,	0.6 * ENEMY_TURRET_SIZE,	1 * ENEMY_TURRET_SIZE,
+	0.6 * ENEMY_TURRET_SIZE,	0,							1 * ENEMY_TURRET_SIZE,
+	0.6 * ENEMY_TURRET_SIZE,	0.6 * ENEMY_TURRET_SIZE,	0,
+	0.6 * ENEMY_TURRET_SIZE,	0,							0,
+	
+	-0.6 * ENEMY_TURRET_SIZE,	0,							1 * ENEMY_TURRET_SIZE,
+	-0.6 * ENEMY_TURRET_SIZE,	0,							0,
+	-0.6 * ENEMY_TURRET_SIZE,	0.6 * ENEMY_TURRET_SIZE,	1 * ENEMY_TURRET_SIZE,
+	-0.6 * ENEMY_TURRET_SIZE,	0.6 * ENEMY_TURRET_SIZE,	0,
+	
+	0.6 * ENEMY_TURRET_SIZE,	0.6 * ENEMY_TURRET_SIZE,	1 * ENEMY_TURRET_SIZE,
+	0.6 * ENEMY_TURRET_SIZE,	0.6 * ENEMY_TURRET_SIZE,	0,
+	0.6 * ENEMY_TURRET_SIZE,	0,							1 * ENEMY_TURRET_SIZE,
+	0.6 * ENEMY_TURRET_SIZE,	0,							0,
+
+	-0.6 * ENEMY_TURRET_SIZE,	0,							1 * ENEMY_TURRET_SIZE,
+	-0.6 * ENEMY_TURRET_SIZE,	0,							0
+};
+
+
+GLfloat TubeBase[3*8] = 
+{
+	-1.0 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,		0 * MAP_BLOCK_SIZE,	
+	-1.0 * MAP_BLOCK_SIZE,	0.4 * MAP_BLOCK_SIZE,	0 * MAP_BLOCK_SIZE,	
+	-1.0 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,		1.5 * MAP_BLOCK_SIZE,	
+	-1.0 * MAP_BLOCK_SIZE,	0.4 * MAP_BLOCK_SIZE,	1.5 * MAP_BLOCK_SIZE,	
+	1.0 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,		1.5 * MAP_BLOCK_SIZE,	
+	1.0 * MAP_BLOCK_SIZE,	0.4 * MAP_BLOCK_SIZE,	1.5 * MAP_BLOCK_SIZE,	
+	1.0 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,		0 * MAP_BLOCK_SIZE,	
+	1.0 * MAP_BLOCK_SIZE,	0.4 * MAP_BLOCK_SIZE,	0 * MAP_BLOCK_SIZE,	
+};
+
+GLfloat TubeFrame[2*8] = 
+{
+	-1.5 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,
+	1.5 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,
+	-1.5 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	1.5 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	-2.5 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	2.5 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	-2.5 * MAP_BLOCK_SIZE,	7 * MAP_BLOCK_SIZE,
+	-2.5 * MAP_BLOCK_SIZE,	7 * MAP_BLOCK_SIZE,
+};
+
+GLfloat TubeWheels[2*8] = 
+{
+	-1.5 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,
+	1.5 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,
+	-1.5 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	1.5 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	-2.5 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	2.5 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	-2.5 * MAP_BLOCK_SIZE,	7 * MAP_BLOCK_SIZE,
+	-2.5 * MAP_BLOCK_SIZE,	7 * MAP_BLOCK_SIZE
+};
+
+GLfloat TubeBlueStrip[2*4] = 
+{
+	-1.5 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,
+	1.5 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,
+	-1.5 * MAP_BLOCK_SIZE,	1.8 * MAP_BLOCK_SIZE,
+	1.5 * MAP_BLOCK_SIZE,	1.8 * MAP_BLOCK_SIZE
+};
+
+GLfloat TubeBlackStrip[2*4] = 
+{
+	-2.55 * MAP_BLOCK_SIZE,	6 * MAP_BLOCK_SIZE,
+	2.55  * MAP_BLOCK_SIZE,	6 * MAP_BLOCK_SIZE,
+	-2.55 * MAP_BLOCK_SIZE,	7.1 * MAP_BLOCK_SIZE,
+	2.55  * MAP_BLOCK_SIZE,	7.1 * MAP_BLOCK_SIZE
+};
+
+GLfloat TubeDoor[2*4] = 
+{
+	1.4 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,
+	2.6 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,
+	1.4 * MAP_BLOCK_SIZE,	6.5 * MAP_BLOCK_SIZE,
+	2.6 * MAP_BLOCK_SIZE,	6.5 * MAP_BLOCK_SIZE
+};
+
+GLfloat TubeDoorWindow[2*4] = 
+{
+	1.75 * MAP_BLOCK_SIZE,	3.5 * MAP_BLOCK_SIZE,
+	2.25 * MAP_BLOCK_SIZE,	3.5 * MAP_BLOCK_SIZE,
+	1.75 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE,
+	2.25 * MAP_BLOCK_SIZE,	5.5 * MAP_BLOCK_SIZE
+};
+
+GLfloat TubeWindow[2*4] = 
+{
+	-1 * MAP_BLOCK_SIZE,	3.5 * MAP_BLOCK_SIZE,
+	1 * MAP_BLOCK_SIZE,		3.5 * MAP_BLOCK_SIZE,
+	-1 * MAP_BLOCK_SIZE,	5 * MAP_BLOCK_SIZE,
+	1 * MAP_BLOCK_SIZE,		5 * MAP_BLOCK_SIZE
+};
+
+GLfloat TubeTurret[3*16] = 
+{
+	-0.5 * MAP_BLOCK_SIZE,	4 * MAP_BLOCK_SIZE,		-0.1 * MAP_BLOCK_SIZE,
+	-0.5 * MAP_BLOCK_SIZE,	4 * MAP_BLOCK_SIZE,		0.1 * MAP_BLOCK_SIZE,
+	-0.5 * MAP_BLOCK_SIZE,	3.4 * MAP_BLOCK_SIZE,	-0.7 * MAP_BLOCK_SIZE,
+	-0.5 * MAP_BLOCK_SIZE,	3.4 * MAP_BLOCK_SIZE,	0.7 * MAP_BLOCK_SIZE,
+	-0.5 * MAP_BLOCK_SIZE,	2 * MAP_BLOCK_SIZE,		-0.65 * MAP_BLOCK_SIZE,
+	-0.5 * MAP_BLOCK_SIZE,	2 * MAP_BLOCK_SIZE,		0.65 * MAP_BLOCK_SIZE,
+	-0.5 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,		-0.9 * MAP_BLOCK_SIZE,
+	-0.5 * MAP_BLOCK_SIZE,	1 * MAP_BLOCK_SIZE,		0.9 * MAP_BLOCK_SIZE,
+	
+	0.5 * MAP_BLOCK_SIZE,		4 * MAP_BLOCK_SIZE,		-0.1 * MAP_BLOCK_SIZE,
+	0.5 * MAP_BLOCK_SIZE,		4 * MAP_BLOCK_SIZE,		0.1 * MAP_BLOCK_SIZE,
+	0.5 * MAP_BLOCK_SIZE,		3.4 * MAP_BLOCK_SIZE,	-0.7 * MAP_BLOCK_SIZE,
+	0.5 * MAP_BLOCK_SIZE,		3.4 * MAP_BLOCK_SIZE,	0.7 * MAP_BLOCK_SIZE,
+	0.5 * MAP_BLOCK_SIZE,		2 * MAP_BLOCK_SIZE,		-0.65 * MAP_BLOCK_SIZE,
+	0.5 * MAP_BLOCK_SIZE,		2 * MAP_BLOCK_SIZE,		0.65 * MAP_BLOCK_SIZE,
+	0.5 * MAP_BLOCK_SIZE,		1 * MAP_BLOCK_SIZE,		-0.9 * MAP_BLOCK_SIZE,
+	0.5 * MAP_BLOCK_SIZE,		1 * MAP_BLOCK_SIZE,		0.9 * MAP_BLOCK_SIZE
+};

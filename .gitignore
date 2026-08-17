@@ -1,0 +1,30 @@
+# Emscripten SDK -- ~1.5 GB, installed per-machine by `make bootstrap`.
+# Never commit this; tools/setup-emsdk.sh reproduces it exactly.
+/emsdk/
+.emscripten*
+/emsdk_env.sh
+
+# Build output
+/build/
+
+# Object files / binaries
+*.o
+*.a
+*.out
+*.wasm
+*.data
+
+# Frame captures from the TANK_SHOT verification hook
+*.ppm
+
+# macOS
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# Editors
+*.swp
+*~
+.vscode/
+.idea/
