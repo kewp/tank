@@ -73,11 +73,14 @@
   <span><b>1</b> top view</span>
   <span><b>0</b> normal view</span>
   <span><b>+ &minus;</b> sensitivity</span>
+  <span><b>[ ]</b> game speed</span>
 </div>
 
 <footer>
   Fixed-function OpenGL 1.x from 2007, running on WebGL through a hand-written shim.<br>
-  Click the start screen&rsquo;s <b>EASY / MEDIUM / HARD</b> to begin.
+  Click the start screen&rsquo;s <b>EASY / MEDIUM / HARD</b> to begin.<br>
+  Runs at half the nominal speed, which is closer to what the 2007 hardware managed &mdash;
+  <b>[</b> and <b>]</b> adjust it.
 </footer>
 
 <script>
@@ -140,7 +143,12 @@
     // deploy fetches its own matching set.
     locateFile: function (path, prefix) { return prefix + path + '?v=__BUILD_ID__'; },
 
-    print:    function (t) { console.log(t); },
+    print: function (t) {
+      console.log(t);
+      // The [ and ] keys adjust GAME_SPEED and print the new value; show it on the page so it
+      // can be dialled in by feel rather than by reading the console.
+      if (/^game speed /.test(t)) { statusEl.style.color = ''; statusEl.textContent = t; }
+    },
 
     // Surface real failures on the page. A WebGL context that will not create, or a shader that
     // will not compile, otherwise produces a silent black canvas that is indistinguishable from

@@ -663,6 +663,6 @@ void MainGameLoop(int value)
 	// [2026 port] In the browser the loop is driven by requestAnimationFrame through a fixed-timestep
 	// accumulator in tankmain.cp, so this self-rearming timer must not fire as well. See WebFrame().
 #ifndef __EMSCRIPTEN__
-	glutTimerFunc( ( 1000/FRAME_RATE ) , MainGameLoop, 1);
+	glutTimerFunc( TankTimerInterval() , MainGameLoop, 1);
 #endif
 }

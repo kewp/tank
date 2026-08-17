@@ -88,6 +88,20 @@ void InGameKeystrokeUp(unsigned char key, int x, int y)
 		case 'p': case 'P':		{	RunMode = PAUSED;		}		break;
 		case '+':				{	MOUSE_SENSETIVITY += 0.1; }		break;
 		case '-':				{	MOUSE_SENSETIVITY -= 0.1; }		break;
+
+		// [2026 port] Live gameplay speed. See GAME_SPEED in GameConstants.cp -- the game is tuned
+		// for a frame rate the 2007 hardware never actually reached, so it plays frantically at its
+		// nominal 80 steps a second. These let you dial it in without a rebuild.
+		case '[':
+			GAME_SPEED -= 0.05f;
+			if (GAME_SPEED < 0.10f) GAME_SPEED = 0.10f;
+			printf("game speed %.2f\n", GAME_SPEED);
+			break;
+		case ']':
+			GAME_SPEED += 0.05f;
+			if (GAME_SPEED > 2.00f) GAME_SPEED = 2.00f;
+			printf("game speed %.2f\n", GAME_SPEED);
+			break;
 	}
  } 
  

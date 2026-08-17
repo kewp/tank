@@ -204,7 +204,11 @@ void WebFrame()
 {
 	static double prev = 0.0;
 	static double accumulator = 0.0;
-	const double step = 1.0 / double(FRAME_RATE);
+
+	// Recomputed every frame because GAME_SPEED is adjustable at runtime with [ and ].
+	double speed = double(GAME_SPEED);
+	if (speed < 0.05) speed = 0.05;
+	const double step = 1.0 / (double(FRAME_RATE) * speed);
 
 	const double now = emscripten_get_now() / 1000.0;
 	if (prev == 0.0) prev = now;
@@ -278,7 +282,7 @@ int main(int argc, char* argv[])
 	// at exactly FRAME_RATE steps per second, which leaves every frame-counted constant valid.
 	emscripten_set_main_loop(WebFrame, 0, 1);
 #else
-	glutTimerFunc( ( 1000/FRAME_RATE ) , MainGameLoop, 1);
+	glutTimerFunc( TankTimerInterval() , MainGameLoop, 1);
 	glutMainLoop();
 #endif
 

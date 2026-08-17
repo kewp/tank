@@ -30,6 +30,20 @@
 	int			Dificulty_Level;
 	
 	float		MOUSE_SENSETIVITY			  = 1.5;
+
+	// [2026 port] Global gameplay speed multiplier.
+	//
+	// Every velocity and duration below is expressed in frames at FRAME_RATE (80), which makes the
+	// simulation framerate-independent -- but 80 steps a second is far more than the 2007 code ever
+	// actually achieved. Even on modern hardware the original fixed-function path renders about 41
+	// fps; on the MacBook this was written for it would have been half that or less. The game was
+	// tuned by feel at that real rate, so running the simulation at its full nominal rate makes
+	// everything frantic.
+	//
+	// This scales simulation steps per second, so movement, firing rates, animation and bullet
+	// speed all slow down together and the game keeps its proportions. 1.0 is the nominal 80
+	// steps/s. Adjust live with [ and ].
+	float		GAME_SPEED					  = 0.5;
 	
 	// GAMEPLAY RELATED CONSTANTS;
 	float		PLAYER_MAX_HEALTH			  = 100;
@@ -54,6 +68,19 @@
 
 	// TIME RELATED CONSTANTS
 	#define		FRAME_RATE						(80)								/*	[frames] / [second]																*/
+
+	// [2026 port] Milliseconds between simulation steps for the native GLUT timer, honouring
+	// GAME_SPEED. The browser build ignores this and uses the accumulator in tankmain.cp instead.
+	// (The 2007 code wrote 1000/FRAME_RATE inline, which integer-divides to 12 -- 83.3 steps a
+	// second rather than the intended 80.)
+	static int TankTimerInterval()
+	{
+		float s = GAME_SPEED;
+		if (s < 0.05f) s = 0.05f;
+		int ms = int(1000.0f / (float(FRAME_RATE) * s) + 0.5f);
+		return (ms < 1) ? 1 : ms;
+	}
+
 	const float	ENEMY_MAX_TIME_TO_FLASH		  =	0.7 * FRAME_RATE;					/*	[frames]				=	[seconds] * ([frames] / [second])					*/
 	float		ENEMY_MAX_TIME_TO_FIRE 		  = 1.0 * FRAME_RATE;					/*	[frames]				=   [seconds] * ([frames] / [second])					*/
 	const float	PLAYER_MAX_TIME_TO_FLASH 	  = 0.7 * FRAME_RATE;					/*	[frames]				=	[seconds] * ([frames] / [second])					*/
