@@ -215,6 +215,11 @@ void reshape(int width, int height)
 void display()
 {
 	int b,t;
+
+	// [2026 port] see SuppressDisplay in GameConstants.cp -- lets the browser frame driver
+	// advance the simulation several steps and draw only once.
+	if (SuppressDisplay) return;
+
 	// Clear the buffer
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 

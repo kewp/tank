@@ -199,16 +199,28 @@ void WebFrame()
 
 	accumulator += dt;
 
+	// MainGameLoop draws at the end of every step, so catching up N steps would mean N full
+	// scene renders in one animation frame. Suppress drawing during catch-up and present once
+	// at the end -- rendering is by far the expensive half, and only the final state is visible.
+	const int MAX_CATCHUP_STEPS = 5;
 	int steps = 0;
-	while (accumulator >= step && steps < 8)
+
+	SuppressDisplay = 1;
+	while ((accumulator >= step) && (steps < MAX_CATCHUP_STEPS))
 	{
-		MainGameLoop(1);          // runs one simulation step; also draws
+		MainGameLoop(1);
 		accumulator -= step;
 		steps++;
 	}
+	SuppressDisplay = 0;
 
-	// If no whole step elapsed, still present a frame so the canvas stays responsive.
-	if (steps == 0) display();
+	// If the cap was hit we are running slower than real time. Drop the backlog rather than
+	// carrying a debt that can never be repaid -- otherwise the accumulator grows without bound
+	// and every subsequent frame runs the maximum number of steps forever, which reads to the
+	// user as a hard freeze.
+	if (steps == MAX_CATCHUP_STEPS) accumulator = 0.0;
+
+	display();
 }
 #endif
 

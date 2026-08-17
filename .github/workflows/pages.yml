@@ -1,0 +1,64 @@
+name: Deploy web build to GitHub Pages
+
+# Builds the WebAssembly version and publishes it to GitHub Pages.
+#
+# Nothing from build/ is ever committed -- the site is compiled fresh from
+# source on every push to main, so what is published always matches the repo.
+#
+# The build runs inside emscripten/emsdk, the image published by the Emscripten
+# project itself, rather than a third-party setup action. That keeps the
+# toolchain source the same one `make bootstrap` installs locally.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:        # lets you redeploy by hand from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deploy finish rather than cancelling it half-published.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: emscripten/emsdk:latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          em++ --version
+          make --version | head -1
+
+      - name: Build the Pages bundle
+        run: make pages
+
+      - name: Check the bundle looks right
+        run: |
+          ls -la build/pages
+          for f in index.html index.js index.wasm index.data; do
+            test -s "build/pages/$f" || { echo "missing or empty: $f"; exit 1; }
+          done
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -17,6 +17,9 @@
 #    make web        build build/web/tank.html
 #    make serve      build and serve it at http://localhost:8000/tank.html
 #
+#  GITHUB PAGES
+#    make pages      build build/pages/index.html (deployed by CI)
+#
 #    make clean      remove build/
 # ---------------------------------------------------------------------------
 
@@ -51,7 +54,7 @@ endif
 
 SRCS := $(wildcard src/*.cp) $(wildcard src/*.h) $(wildcard src/gl1/*)
 
-.PHONY: all run shim run-shim web serve bootstrap clean
+.PHONY: all run shim run-shim web serve pages bootstrap clean
 
 all: $(BIN)
 
@@ -101,6 +104,21 @@ web: build/web/tank.html
 
 build/web/tank.html: $(SRCS) $(wildcard assets/*) web/shell.html
 	@mkdir -p build/web
+	@test -x "$(EMXX)" || { \
+		echo "Emscripten not found. Run:  make bootstrap"; exit 1; }
+	"$(EMXX)" $(EMFLAGS) --shell-file web/shell.html \
+		-x c++ $(MAIN) -x c++ src/gl1/gl1.cpp -o $@
+	@echo "built $@"
+
+# ---------------------------------------------------------------------------
+#  GitHub Pages bundle. Identical to `make web`, but emitted as index.html so
+#  it can be served from the root of a Pages site. Built in CI by
+#  .github/workflows/pages.yml -- nothing from build/ is ever committed.
+# ---------------------------------------------------------------------------
+pages: build/pages/index.html
+
+build/pages/index.html: $(SRCS) $(wildcard assets/*) web/shell.html
+	@mkdir -p build/pages
 	@test -x "$(EMXX)" || { \
 		echo "Emscripten not found. Run:  make bootstrap"; exit 1; }
 	"$(EMXX)" $(EMFLAGS) --shell-file web/shell.html \

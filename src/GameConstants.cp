@@ -138,10 +138,16 @@
 	// Note: I undestand that this is generally bad practice, but for the most part, I haven't figured out how to get OpenGL's 
 	// display function to accept arguments, and so until I do so, the following, with the game objects, must be global
 	
+	// [2026 port] When set, display() returns without drawing. The browser frame driver
+	// (WebFrame in tankmain.cp) uses it to run several simulation steps per animation frame while
+	// rendering only the final state -- MainGameLoop draws on every step, which would otherwise
+	// mean up to N full scene renders per frame.
+	int SuppressDisplay = 0;
+
 	float camera_x;
 	float camera_y;
 	float camera_z;
-	
+
 	float lineOfSight_x;
 	float lineOfSight_y;
 	float lineOfSight_z;
